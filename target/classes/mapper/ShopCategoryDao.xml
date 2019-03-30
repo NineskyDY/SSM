@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--nameSpace为要实现的dao的地址-->
+<mapper namespace="o2o.dao.ShopCategoryDao">
+    <!--id为要实现的具体方法-->
+    <select id="queryShopCategory" resultType="o2o.entity.ShopCategory">
+        SELECT
+        shop_category_id,shop_category_name,shop_category_img,
+        priority,create_time,last_edit_time,parent_id
+        FROM tb_shop_category
+        <where>
+            <if test="shopCategoryCondition==null">
+                AND parent_id IS NULL
+            </if>
+            <if test="shopCategoryCondition != null">
+                AND parent_id IS NOT NULL
+            </if>
+            <if test="shopCategoryCondition != null and shopCategoryCondition.parentID!=null">
+                and  parent_id = #{shopCategoryCondition.parent.shopCategoryId}
+            </if>
+        </where>
+        ORDER BY
+        priority DESC
+    </select>
+</mapper>

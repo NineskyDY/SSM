@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/mvc
+    http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd">
+	<!-- 配置SpringMVC -->
+	<!-- 1.开启SpringMVC注解模式 -->
+	<!-- 简化配置： (1)自动注册DefaultAnootationHandlerMapping,AnotationMethodHandlerAdapter 
+		(2)提供一些列：数据绑定，数字和日期的format @NumberFormat, @DateTimeFormat, xml,json默认读写支持 -->
+	<mvc:annotation-driven />
+
+	<!-- 2.静态资源默认servlet配置 (1)加入对静态资源的处理：js,gif,png (2)允许使用"/"做整体映射 -->
+	<mvc:resources mapping="/resources/**" location="/resources/" />
+	<mvc:default-servlet-handler />
+
+	<!-- 3.定义视图解析器 -->
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/html/"></property>
+		<property name="suffix" value=".html"></property>
+	</bean>
+	<!--文件上传解析器-->
+	<bean id="multipartResolver"
+		  class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<!-- 上传文件大小上限，单位为字节（10MB） -->
+		<property name="maxUploadSize">
+			<value>20971520</value>
+		</property>
+		<!-- 请求的编码格式，必须和jSP的pageEncoding属性一致，以便正确读取表单的内容，默认为ISO-8859-1 -->
+		<property name="defaultEncoding">
+			<value>UTF-8</value>
+		</property>
+		<property name="maxInMemorySize" value="20971520"></property>
+	</bean>
+	<!-- 4.扫描web相关的bean -->
+	<context:component-scan base-package="o2o.web" />
+	<!--5.权限拦截器-->
+	<mvc:interceptors>
+	<!--校验是否已经登陆了店家管理系统的拦截器-->
+		<mvc:interceptor>
+			<mvc:mapping path="/shopAdmin/**" />
+			<bean id="ShopInterceptor" class="o2o.interceptor.shopAdmin.ShopLoginInterceptor" />
+		</mvc:interceptor>
+		<!--校验是否对该店铺有操作权限的拦截器-->
+		<mvc:interceptor>
+			<mvc:mapping path="/shopAdmin/**" />
+			<!-- shoplist page -->
+			<mvc:exclude-mapping path="/shopAdmin/shopList" />
+			<mvc:exclude-mapping path="/shopAdmin/getShopList"/>
+			<!-- shopregister page -->
+			<mvc:exclude-mapping path="/shopAdmin/shopOperation" />
+			<mvc:exclude-mapping path="/shopAdmin/getShopInitInfo" />
+			<mvc:exclude-mapping path="/shopAdmin/registerShop" />
+			<!-- shopmanage page -->
+			<mvc:exclude-mapping path="/shopAdmin/shopManagement" />
+			<mvc:exclude-mapping path="/shopAdmin/shopManagementInfo" />
+			<bean id="ShopPermissionInterceptor"
+				  class="o2o.interceptor.shopAdmin.ShopPermissionInterceptor" />
+		</mvc:interceptor>
+	</mvc:interceptors>
+
+</beans>
